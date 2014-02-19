@@ -31,13 +31,14 @@ void set_sames_bounds_in_column(Board board, Object object, int& min_i, int& max
 		else
 			break;
 	}
-	for(int i = object.i + 1; i < board.column_count; i++)
+	for(int i = object.i + 1; i < board.row_count; i++)
 	{
 		if(board.objects[i][object.j].color == object.color)
 			max_i = i;
 		else
 			break;
 	}
+
 }
 
 int count_sames_in_row(Board board,Object object)
@@ -68,45 +69,78 @@ bool rotatable(Board board, Object obj1,Object obj2)
 	return false;
 }
 
-vector < vector < Object > >  get_duplicates_block(Board board,Object object)
+void rotate(Board board,Object& obj1,Object& obj2)
+{
+	obj1.i = obj1.i + obj2.i - (obj2.i = obj1.i);
+	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);
+}
+
+vector <string>  get_duplicates_block(Board board,Object object) //pattern: cArBtC (column A from row B to row C)
 {
 	vector <string> blocks;
-
-	for(int j = object.j - 1; j >= 0; j--)
+	int min_j,max_j,min_i,max_i;
+	set_sames_bounds_in_row(board,object,min_j,max_j);
+	set_sames_bounds_in_column(board,object,min_i,max_i);
+ 	for(int j = min_j; j <= max_j; j++)
 	{
-		if(board.objects[object.i][j].color == object.color)
-			blocks.push_back("j"+to_string(j)+"i"+to_string(object.i)+to_string(object.i));
-		else
-			break;
-	}
-	
-	int min_i = object.i, max_i = object1.i;
-
-	for(int i = object.i - 1; i >= 0; i--)
-	{
-		if(board.objects[i][object.j].color == object.color)
-			min_i--;
-		else
-			break;
-	}
-	
-	for(int i = object.i + 1; i < board.row_count; i++)
-	{
-		if(board.objects[i][object.j].color == object.color)
-			max_i++;
-		else
-			break;
+		if(j == object.j)
+			continue;
+		blocks.push_back("c" + to_string(j) + "r" + to_string(object.i) + "t" + to_string(object.i));
 	}
 
-	blocks.push_back("j"+object.j+"i"+min_i+max_i);
+	blocks.push_back("c" + to_string(object.j) + "r" + to_string(min_i) + "t" + to_string(max_i));
+	return blocks;
+}
 
-	for(int j = object.j + 1; j < board.column_count ; j++)
+Object get_random_object(Board board)
+{
+	Object object;
+	double random_weight;
+	//srand(time(NULL));
+	random_weight = (rand() / ((double) RAND_MAX + 1.0));
+	double sum = 0;
+	for(int i = 0; i < COLORS_COUNT; i++)
 	{
-		if(board.objects[object.i][j].color == object.color)
-			blocks.push_back("j"+j+"i"+object.i+object.i);
-		else
-			break;
+		sum += board.weights[i];
+		if(random_weight < sum)
+		{
+			object.color = board.colors[i];
+			return object;
+		}
 	}
 	
 }
+
+void shift_down(Board& board, int column, int row_start, int row_end, int offset)
+{
+	for(int i = row_end; i >= row_start; i--)
+		board.objects[i+offset][column] = board.objects[i][column];
+	
+	for(int i = row_start+offset-1; i >= 0; i--)
+		board.objects[i][column].color = get_random_object(board).color;
+}
+
+void move_and_replace(Board& board, vector <string> blocks)
+{
+	srand(time(NULL));
+	int column,row_start,row_end;
+	for(int i = 0; i < blocks.size(); i++)
+	{
+		column = get_column(blocks[i]);
+		row_start = get_row_start(blocks[i]);
+		row_end = get_row_end(blocks[i]);
+		
+		if(is_single_block(blocks[i]))
+		{
+			if(row_start != 0)
+				shift_down(board,column,0,row_start-1,1);
+			else
+				board.objects[0][column].color = get_random_object(board).color;
+		}
+		else
+			shift_down(board,column,0,row_start-1,row_end-row_start+1);
+	}
+}
+
+
 

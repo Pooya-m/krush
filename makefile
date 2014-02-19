@@ -1,2 +1,2 @@
 all:
-	g++ board.cpp backend.cpp main.cpp utils.cpp
+	g++ board.cpp backend.cpp main.cpp parser.cpp

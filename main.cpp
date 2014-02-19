@@ -1,6 +1,7 @@
 #include <cstring>
 #include <cmath>
 #include "backend.h"
+#include <cstdlib>
 using namespace std;
 
 bool rotatable(Object,Object);
@@ -11,6 +12,9 @@ int main()
 {
 	Board board;
 	init_board(board);
+	dump_board(board);
+	cout << endl;
+	shift_down(board,1,0,1,2);
 	dump_board(board);
 	return 0;
 }

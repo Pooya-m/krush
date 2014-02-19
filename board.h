@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+#include <cstdlib>
 #define COLORS_COUNT 5
 #define TYPE_NORMAL 0
 
