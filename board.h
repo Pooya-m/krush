@@ -13,6 +13,14 @@ typedef struct Object {
 	int j;
 } Object;
 
+typedef struct Block {
+	//int column;
+	//int row_start;
+	//int row_end;
+	//vector < string > sub_blocks;
+	vector < vector < Object > > sub_blocks;
+} Block;
+
 typedef struct Board {
 	char colors[5];
 	double weights[5];

@@ -1,5 +1,6 @@
 #include "backend.h"
 #include <cmath>
+#include <algorithm>
 using namespace std;
 
 void set_sames_bounds_in_row(Board board, Object object, int& min_j, int& max_j)
@@ -75,21 +76,33 @@ void rotate(Board board,Object& obj1,Object& obj2)
 	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);
 }
 
-vector <string>  get_duplicates_block(Board board,Object object) //pattern: cArBtC (column A from row B to row C)
+Block get_duplicates_block(Board board,Object object) //pattern: cArBtC (column A from row B to row C)
 {
-	vector <string> blocks;
-	int min_j,max_j,min_i,max_i;
+	Block block;
+	int min_j,max_j,min_i,max_i,self_index = -1;
 	set_sames_bounds_in_row(board,object,min_j,max_j);
 	set_sames_bounds_in_column(board,object,min_i,max_i);
- 	for(int j = min_j; j <= max_j; j++)
+	if((max_j - min_j + 1) >= 3)
 	{
-		if(j == object.j)
-			continue;
-		blocks.push_back("c" + to_string(j) + "r" + to_string(object.i) + "t" + to_string(object.i));
+		for(int j = min_j; j <= max_j; j++)
+		{
+			if(j == object.j)
+				self_index = block.sub_blocks.size();
+			block.sub_blocks.push_back(vector < Object >(1,board.objects[object.i][j]));
+		}
 	}
 
-	blocks.push_back("c" + to_string(object.j) + "r" + to_string(min_i) + "t" + to_string(max_i));
-	return blocks;
+	if((max_i - min_i + 1) >= 3)
+	{
+		if(self_index != -1)
+			block.sub_blocks.erase(block.sub_blocks.begin() + self_index);
+		block.sub_blocks.push_back(vector < Object >(0));
+		cout << "here2" << endl;
+		for(int i = min_i; i <= max_i;i++)
+			block.sub_blocks.back().push_back(board.objects[i][object.j]);
+	}
+	
+	return block;
 }
 
 Object get_random_object(Board board)
@@ -114,14 +127,24 @@ Object get_random_object(Board board)
 void shift_down(Board& board, int column, int row_start, int row_end, int offset)
 {
 	for(int i = row_end; i >= row_start; i--)
-		board.objects[i+offset][column] = board.objects[i][column];
+	{
+		board.objects[i+offset][column].type = board.objects[i][column].type;
+		board.objects[i+offset][column].color = board.objects[i][column].color;
+	}
 	
 	for(int i = row_start+offset-1; i >= 0; i--)
 		board.objects[i][column].color = get_random_object(board).color;
 }
 
-void move_and_replace(Board& board, vector <string> blocks)
+/*void move_and_replace(Board& board, vector <string> blocks)
 {
+	cout << "move and replace:  " << endl;
+	cout << "======" << endl;
+	for(int i = 0; i < blocks.size();i++)
+		cout << blocks[i] << endl;
+	cout << "======" << endl;
+
+
 	srand(time(NULL));
 	int column,row_start,row_end;
 	for(int i = 0; i < blocks.size(); i++)
@@ -133,14 +156,139 @@ void move_and_replace(Board& board, vector <string> blocks)
 		if(is_single_block(blocks[i]))
 		{
 			if(row_start != 0)
+			{
+				cout << "shifting down column " << column << " from row " << 0 << " to row " << row_start - 1 << " with 1 offset" << endl;
 				shift_down(board,column,0,row_start-1,1);
+			}
 			else
+			{
+				cout << "creating random for i:  " << 0 << " j: " << column << endl;
 				board.objects[0][column].color = get_random_object(board).color;
+			}
 		}
 		else
+		{
+			cout << "shifting down column " << column << " from row " << 0 << " to row " << row_start - 1 << " with " << row_end-row_start+1 << "offset" << endl;
 			shift_down(board,column,0,row_start-1,row_end-row_start+1);
+		}
 	}
 }
+
+vector < Object > get_objects(Board board, vector < string > blocks)
+{
+	vector < Object > objects;
+	int column,row_start,row_end;
+	for(int i = 0; i < blocks.size(); i++)
+	{
+		column = get_column(blocks[i]);
+		row_start = get_row_start(blocks[i]);
+		row_end = get_row_end(blocks[i]);
+		for(int i = row_start; i != row_end; i++)
+			objects.push_back(board.objects[i][column]);
+	}
+	return objects;
+	}*/
+
+void blow_out(Board& board, Object object, vector <Object>& removed_objects)
+{
+	Block object_block = get_duplicates_block(board,object);
+	if(object_block.sub_blocks.size() == 0)
+		return;
+	
+	for(int i = 0; i < object_block.sub_blocks.size();i++)
+		for(int j = 0; j < object_block.sub_blocks[i].size(); j++)
+			removed_objects.push_back(object_block.sub_blocks[i][j]);
+}
+
+vector <Object> get_objects(Block block)
+{
+	vector <Object> result;
+	for(int i = 0; i < block.sub_blocks.size(); i++)
+		for(int j = 0; j < block.sub_blocks[i].size(); j++)
+			result.push_back(block.sub_blocks[i][j]);
+	return result;
+}
+
+/*void remove_duplicates(vector <Object>& objects)
+{
+	for(int i = 0; i < objects.size(); i++)
+		for(int j = i + 1; j < objects.size(); j++)
+			if(objects[i] == objects[j])
+				objects.erase(objects.begin() + j);
+				}*/
+
+bool compare(Object obj1,Object obj2)
+{
+	if(obj1.j < obj2.j)
+		return true;
+
+	if(obj1.j == obj2.j)
+		if(obj1.i < obj2.i)
+			return true;
+	
+	return false;
+}
+
+void blow_out(Board& board, vector < Block > blocks)
+{
+	if(blocks.size() == 0)
+		return;
+
+	vector <Object> temp_objects,objects;
+	for(int i = 0; i < blocks.size(); i++)
+	{
+		temp_objects = get_objects(blocks[i]);
+		objects.insert(objects.end(),temp_objects.begin(),temp_objects.end());
+	}
+
+	if(objects.size() == 0)
+		return;
+	
+	sort(objects.begin(),objects.end(),compare);
+
+
+	for(int i = 0; i < objects.size() - 1;)
+	{
+		if((objects[i].i == objects[i+1].i) and (objects[i].j == objects[i+1].j))
+			objects.erase(objects.begin()+i+1);
+		else
+			i++;
+	}
+	
+	//unique(objects.begin(),objects.end(),check);
+
+	cout << "free objects:  " << endl;
+	for(int i = 0; i < objects.size();i++)
+		cout << objects[i].i << " " << objects[i].j << endl;
+	
+	vector < Block > result_blocks;
+	for(int i = 0; i < objects.size(); i++)
+		shift_down(board,objects[i].j,0,objects[i].i-1,1);
+	dump_board(board);
+	cout << endl;
+	Block temp_block;
+	for(int i = 0; i < objects.size();i++) //for caution
+	{
+		for(int j = 0; j < objects[i].i;j++)
+		{	
+			temp_block = get_duplicates_block(board,board.objects[j][objects[i].j]);
+			/*cout << "new blowings of object:  " << j << " " << objects[i].j << endl;	
+			for(int k = 0; k < temp_block.sub_blocks.size(); k++)
+				for(int l = 0; l < temp_block.sub_blocks[k].size(); l++)
+				cout << temp_block.sub_blocks[k][l].i << " " << temp_block.sub_blocks[k][l].j << endl;*/
+			result_blocks.push_back(get_duplicates_block(board,board.objects[j][objects[i].j]));
+		}
+	}
+	
+	blow_out(board,result_blocks);
+}
+
+
+
+
+
+
+
 
 
 
