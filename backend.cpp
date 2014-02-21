@@ -81,10 +81,10 @@ bool rotatable(Board board, Object obj1,Object obj2)
 	return false;
 }
 
-void rotate(Board& board,Object& obj1,Object& obj2)
+void rotate(Board& board,Object& obj1,Object& obj2, SDL_Surface*& screen)
 {
-	
-	int i = obj1.i,j = obj1.j;
+	rotate_in_graphic(board,obj1,obj2,screen);
+	/*int i = obj1.i,j = obj1.j;
 	int ii = obj2.i,jj = obj2.j;
 
 	Object temp = obj1;
@@ -93,7 +93,22 @@ void rotate(Board& board,Object& obj1,Object& obj2)
 	
 
 	obj1.i = obj1.i + obj2.i - (obj2.i = obj1.i);
+	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);*/
+
+	int i = obj1.i,j = obj1.j;
+	int ii = obj2.i,jj = obj2.j;
+	Object temp = obj1;
+
+	board.objects[i][j] = obj2;
+	board.objects[ii][jj] = temp;
+
+  /* because of passed by value */
+	board.objects[i][j].i = board.objects[i][j].i + board.objects[ii][jj].i - (board.objects[ii][jj].i = board.objects[i][j].i);
+	board.objects[i][j].j = board.objects[i][j].j + board.objects[ii][jj].j - (board.objects[ii][jj].j = board.objects[i][j].j);
+	obj1.i = obj1.i + obj2.i - (obj2.i = obj1.i);
 	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);
+	/* */
+	
 }
 
 Block get_duplicates_block(Board board,Object object) //pattern: cArBtC (column A from row B to row C)
@@ -137,6 +152,7 @@ Object get_random_object(Board board)
 		if(random_weight < sum)
 		{
 			object.color = board.colors[i];
+			object.image = board.images[i];
 			return object;
 		}
 	}
@@ -149,10 +165,15 @@ void shift_down(Board& board, int column, int row_start, int row_end, int offset
 	{
 		board.objects[i+offset][column].type = board.objects[i][column].type;
 		board.objects[i+offset][column].color = board.objects[i][column].color;
+		board.objects[i+offset][column].image = board.objects[i][column].image;
 	}
 	
 	for(int i = row_start+offset-1; i >= 0; i--)
-		board.objects[i][column].color = get_random_object(board).color;
+	{
+		Object temp = get_random_object(board);
+		board.objects[i][column].color = temp.color;
+		board.objects[i][column].image = temp.image;
+	}
 }
 
 
@@ -177,7 +198,7 @@ bool compare(Object obj1,Object obj2)
 	return false;
 }
 
-void blow_out(Board& board, vector < Block > blocks)
+void blow_out(Board& board, vector < Block > blocks,SDL_Surface*& screen)
 {
 	if(blocks.size() == 0)
 		return;
@@ -212,7 +233,12 @@ void blow_out(Board& board, vector < Block > blocks)
 
 	
 	for(int i = 0; i < objects.size(); i++)
+	{
+		remove_object_from_screen(board,objects[i],screen);
 		shift_down(board,objects[i].j,0,objects[i].i-1,1);
+	}
+	SDL_Delay(1000);
+	reload_screen(board,screen);
 
 	cout << "after blow:  " << endl;
 	dump_board(board);
@@ -223,20 +249,20 @@ void blow_out(Board& board, vector < Block > blocks)
 		for(int j = 0; j <= objects[i].i;j++)
 			result_blocks.push_back(get_duplicates_block(board,board.objects[j][objects[i].j]));
 	
-	blow_out(board,result_blocks);
+	blow_out(board,result_blocks,screen);
 }
 
-void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2)
+void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2,SDL_Surface*& screen)
 {
 	cout << "before rotate:  " << endl;
 	dump_board(board);
 	if(rotatable(board,obj1,obj2))
-		rotate(board,obj1,obj2);
+		rotate(board,obj1,obj2,screen);
 	else
 	{
 		cout << "not rotatable" << endl;
-		rotate(board,obj1,obj2);
-		rotate(board,obj1,obj2);
+		rotate(board,obj1,obj2,screen);
+		rotate(board,obj1,obj2,screen);
 		return;
 	}
 	cout << "after rotate before blow:  " << endl;
@@ -245,7 +271,7 @@ void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2)
 	vector <Block> blocks;
 	blocks.push_back(get_duplicates_block(board,obj1));
 	blocks.push_back(get_duplicates_block(board,obj2));
-	blow_out(board,blocks);
+	blow_out(board,blocks,screen);
 }
 
 

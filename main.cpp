@@ -32,22 +32,45 @@ int main(int argc,char* args[])
 				quit = true;
 				break;
 			}
-
+			//		remove_object_from_screen(board,board.objects[0][0],screen);
+			//move_to(board,board.objects[1][0].image,screen,0,50,0,0);
+//			dump_board_without(board,board.objects[0][0],board.objects[1][0],screen);
+			//rotate_in_graphic(board,board.objects[0][0],board.objects[1][0],screen);
+//			SDL_Delay(1000);
+			//move_to(board,board.objects[0][0].image,screen,0,0,0,50);
+			//dump_board_without(board,board.objects[0][0],screen);
+			//		SDL_Delay(2000);
+			//quit = true;
+			//break;
 			if(event.type == SDL_MOUSEBUTTONDOWN)
 			{
 				if(event.button.button == SDL_BUTTON_LEFT )
 				{
 					select_object(board,event,screen,selected_objects);
+					//remove_object_from_screen(board,selected_objects[0],screen);
+					//SDL_Delay(2000);
 					click++;
 					if(click == 2)
 					{
-						cout << "unselect" << endl;
-						for(int i = 0; i < selected_objects.size(); i++)
-							unselect_object(board,screen,selected_objects[i]);
+						if(rotatable(board,selected_objects[0],selected_objects[1]))
+						{
+							//rotate(board,selected_objects[0],selected_objects[1],screen);
+							rotate_and_blow_out(board,selected_objects[0],selected_objects[1],screen);
+						}
+						else
+						{
+							rotate(board,selected_objects[0],selected_objects[1],screen);
+							rotate(board,selected_objects[0],selected_objects[1],screen);
+						}
+							
+						
+						//cout << "unselect" << endl;
+						//for(int i = 0; i < selected_objects.size(); i++)
+						//	unselect_object(board,screen,selected_objects[i]);
 						click = 0;
 						selected_objects.clear();
 					}
-				}
+					}
 			}
 		}
 	}
