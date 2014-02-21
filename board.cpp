@@ -47,6 +47,7 @@ void dump_board(Board& board)
 	{
 		for(int j = 0; j < board.column_count; j++)
 			cout << board.objects[i][j].color << " ";
+		//cout << board.objects[i][j].i << " " << board.objects[i][j].j << "(" << board.objects[i][j].color << ")" << " ";
 		cout << endl;
 	}
 }
