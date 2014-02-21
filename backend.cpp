@@ -227,11 +227,7 @@ void blow_out(Board& board, vector < Block > blocks,SDL_Surface*& screen)
 			i++;
 	}
 
-/*	cout << "free objects:  " << endl;
-	for(int i = 0; i < objects.size();i++)
-	cout << objects[i].i << " " << objects[i].j << endl;*/
-
-	
+	SDL_Delay(1000);
 	for(int i = 0; i < objects.size(); i++)
 	{
 		remove_object_from_screen(board,objects[i],screen);
@@ -254,8 +250,6 @@ void blow_out(Board& board, vector < Block > blocks,SDL_Surface*& screen)
 
 void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2,SDL_Surface*& screen)
 {
-	cout << "before rotate:  " << endl;
-	dump_board(board);
 	if(rotatable(board,obj1,obj2))
 		rotate(board,obj1,obj2,screen);
 	else
@@ -265,9 +259,6 @@ void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2,SDL_Surface*& 
 		rotate(board,obj1,obj2,screen);
 		return;
 	}
-	cout << "after rotate before blow:  " << endl;
-	dump_board(board);
-	cout << endl;
 	vector <Block> blocks;
 	blocks.push_back(get_duplicates_block(board,obj1));
 	blocks.push_back(get_duplicates_block(board,obj2));

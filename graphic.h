@@ -15,6 +15,8 @@ void unselect_object(Board,SDL_Surface*&,Object);
 void rotate_in_graphic(Board,Object&,Object&,SDL_Surface*&);
 bool is_valid_click(Board,SDL_Event);
 void dump_board_without(Board,Object,Object,SDL_Surface*&);
+void dump_board_without(Board,vector <Object>, SDL_Surface*&);
 void remove_object_from_screen(Board,Object,SDL_Surface*&);
+void move_to(Board,Object&,vector <Object>,SDL_Surface*& screen,int dest_x,int dest_y);
 void reload_screen(Board,SDL_Surface*&);
 SDL_Surface* load_image(string);

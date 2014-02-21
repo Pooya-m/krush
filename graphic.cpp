@@ -73,8 +73,53 @@ void dump_board_without(Board board, Object obj1,Object obj2,SDL_Surface*& scree
 			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
 			}
 
-	SDL_Flip(screen);
- 
+	SDL_Flip(screen); 
+}
+
+void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& screen)
+{
+	SDL_Rect rect;
+	rect.h = SCREEN_HEIGHT;
+	rect.w = SCREEN_WIDTH;
+	SDL_FillRect(screen,NULL,0x000000);
+	bool check = false;
+	for(int i = 0; i < board.row_count; i++)
+		for(int j = 0; j < board.column_count; j++)
+		{
+			for(int k = 0; k < objects.size(); k++)
+				if(objects[k].i == i and objects[k].j == j)
+					check = true;
+			if(check)
+			{
+				check = false;
+				continue;
+			}
+			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
+	 }
+	SDL_Flip(screen); 
+}
+
+void move_to(Board board,Object& object, vector <Object> removed_objects,SDL_Surface*& screen,int dest_x, int dest_y)
+{
+	SDL_Rect rect;
+	rect.x = object.j * 50;
+	rect.y = object.i * 50;
+	while((rect.x != dest_x) or (rect.y != dest_y))
+	{
+		dump_board_without(board,removed_objects,screen);
+		if(rect.x < dest_x)
+			rect.x += 1;
+		else if(rect.x > dest_x)
+			rect.x -= 1;
+
+		if(rect.y < dest_y)
+			rect.y += 1;
+		else if(rect.y > dest_y)
+			rect.y -= 1;
+		SDL_BlitSurface(object.image,NULL,screen,&rect);
+		SDL_Flip(screen);
+		SDL_Delay(3);
+	}
 }
 
 void rotate_in_graphic(Board board,Object& obj1,Object& obj2,SDL_Surface*& screen)
