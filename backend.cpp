@@ -72,7 +72,8 @@ bool rotatable(Board board, Object obj1,Object obj2)
 	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);
 	/* */
 	
-	if(abs(obj1.i - obj2.i) != 1 and abs(obj1.j - obj2.j) != 1)
+//	if(abs(obj1.i - obj2.i) > 1 or abs(obj1.j - obj2.j) > 1)
+	if((pow((obj1.i - obj2.i),2) + pow((obj1.j - obj2.j),2)) > 1)
 		return false;
 	if(count_sames_in_column(board, obj1) >= 3 or count_sames_in_row(board, obj1) >= 3)
 		return true;
@@ -81,9 +82,9 @@ bool rotatable(Board board, Object obj1,Object obj2)
 	return false;
 }
 
-void rotate(Board& board,Object& obj1,Object& obj2, SDL_Surface*& screen)
+void rotate(Board& board,Object& obj1,Object& obj2)
 {
-	rotate_in_graphic(board,obj1,obj2,screen);
+	rotate_in_graphic(board,obj1,obj2);
 	/*int i = obj1.i,j = obj1.j;
 	int ii = obj2.i,jj = obj2.j;
 
@@ -198,7 +199,7 @@ bool compare(Object obj1,Object obj2)
 	return false;
 }
 
-void blow_out(Board& board, vector < Block > blocks,SDL_Surface*& screen)
+void blow_out(Board& board, vector < Block > blocks)
 {
 	if(blocks.size() == 0)
 		return;
@@ -230,11 +231,11 @@ void blow_out(Board& board, vector < Block > blocks,SDL_Surface*& screen)
 	SDL_Delay(1000);
 	for(int i = 0; i < objects.size(); i++)
 	{
-		remove_object_from_screen(board,objects[i],screen);
+		remove_object_from_screen(board,objects[i]);
 		shift_down(board,objects[i].j,0,objects[i].i-1,1);
 	}
 	SDL_Delay(1000);
-	reload_screen(board,screen);
+	reload_screen(board);
 
 	cout << "after blow:  " << endl;
 	dump_board(board);
@@ -245,24 +246,50 @@ void blow_out(Board& board, vector < Block > blocks,SDL_Surface*& screen)
 		for(int j = 0; j <= objects[i].i;j++)
 			result_blocks.push_back(get_duplicates_block(board,board.objects[j][objects[i].j]));
 	
-	blow_out(board,result_blocks,screen);
+	blow_out(board,result_blocks);
 }
 
-void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2,SDL_Surface*& screen)
+void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2)
 {
 	if(rotatable(board,obj1,obj2))
-		rotate(board,obj1,obj2,screen);
+		rotate(board,obj1,obj2);
 	else
 	{
 		cout << "not rotatable" << endl;
-		rotate(board,obj1,obj2,screen);
-		rotate(board,obj1,obj2,screen);
+		rotate(board,obj1,obj2);
+		rotate(board,obj1,obj2);
 		return;
 	}
 	vector <Block> blocks;
 	blocks.push_back(get_duplicates_block(board,obj1));
 	blocks.push_back(get_duplicates_block(board,obj2));
-	blow_out(board,blocks,screen);
+	blow_out(board,blocks);
+}
+
+void handle_mouse_event(Board& board,SDL_Event event,vector <Object>& selected_objects)
+{
+	if(event.button.button == SDL_BUTTON_LEFT )
+	{
+		select_object(board,event,selected_objects);
+		if(selected_objects.size() == 2)
+		{
+			if(rotatable(board,selected_objects[0],selected_objects[1]))
+				rotate_and_blow_out(board,selected_objects[0],selected_objects[1]);
+			else
+			{
+				rotate(board,selected_objects[0],selected_objects[1]);
+				rotate(board,selected_objects[0],selected_objects[1]);
+			}
+			selected_objects.clear();
+		}
+	}
+}
+
+void free_everything(Board& board)
+{
+	for(int i = 0; i < 5; i++)
+		free(board.images[i]);
+	SDL_FreeSurface(board.screen);
 }
 
 

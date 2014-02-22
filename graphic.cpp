@@ -28,7 +28,7 @@ bool is_valid_click(Board board, SDL_Event event)
 	return true;
 }
 
-void select_object(Board board, SDL_Event event, SDL_Surface*& screen,vector <Object>& selected_objects)
+void select_object(Board& board, SDL_Event event,vector <Object>& selected_objects)
 {
 	if(!is_valid_click(board,event))
 	{
@@ -40,29 +40,29 @@ void select_object(Board board, SDL_Event event, SDL_Surface*& screen,vector <Ob
 	int y = event.button.y;
 //	cout << "selected:  " << endl;
 //	cout << y / 50 << " " << x / 50 << endl;
-	apply_surface((x / 50) * 50, (y / 50) * 50,board.selected_object,screen);
-	SDL_Flip(screen);
+	apply_surface((x / 50) * 50, (y / 50) * 50,board.selected_object,board.screen);
+	SDL_Flip(board.screen);
 	selected_objects.push_back(board.objects[y/50][x/50]);
 }
 
-void unselect_object(Board board, SDL_Surface*& screen,Object object)
+void unselect_object(Board& board,Object object)
 {
 		SDL_Rect rect;
    	rect.x = object.j * 50;
 		rect.y = object.i * 50;
 		rect.h = 50;
 		rect.w = 50;
-		SDL_FillRect(screen,&rect,0x000000);
-		apply_surface(rect.x,rect.y,object.image,screen);
-		SDL_Flip(screen);
+		SDL_FillRect(board.screen,&rect,0x000000);
+		apply_surface(rect.x,rect.y,object.image,board.screen);
+		SDL_Flip(board.screen);
 }
 
-void dump_board_without(Board board, Object obj1,Object obj2,SDL_Surface*& screen)
+void dump_board_without(Board& board, Object obj1,Object obj2)
 {
 	SDL_Rect rect;
 	rect.h = SCREEN_HEIGHT;
 	rect.w = SCREEN_WIDTH;
-	SDL_FillRect(screen,NULL,0x000000);
+	SDL_FillRect(board.screen,NULL,0x000000);
 	for(int i = 0; i < board.row_count; i++)
 		for(int j = 0; j < board.column_count; j++)
 		{
@@ -70,10 +70,10 @@ void dump_board_without(Board board, Object obj1,Object obj2,SDL_Surface*& scree
 				continue;
 			if(obj2.i == i and obj2.j == j)
 				continue;
-			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
+			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
 			}
 
-	SDL_Flip(screen); 
+	SDL_Flip(board.screen); 
 }
 
 void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& screen)
@@ -99,14 +99,14 @@ void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& scree
 	SDL_Flip(screen); 
 }
 
-void move_to(Board board,Object& object, vector <Object> removed_objects,SDL_Surface*& screen,int dest_x, int dest_y)
+void move_to(Board& board,Object& object, vector <Object> removed_objects,int dest_x, int dest_y)
 {
 	SDL_Rect rect;
 	rect.x = object.j * 50;
 	rect.y = object.i * 50;
 	while((rect.x != dest_x) or (rect.y != dest_y))
 	{
-		dump_board_without(board,removed_objects,screen);
+		dump_board_without(board,removed_objects,board.screen);
 		if(rect.x < dest_x)
 			rect.x += 1;
 		else if(rect.x > dest_x)
@@ -116,13 +116,13 @@ void move_to(Board board,Object& object, vector <Object> removed_objects,SDL_Sur
 			rect.y += 1;
 		else if(rect.y > dest_y)
 			rect.y -= 1;
-		SDL_BlitSurface(object.image,NULL,screen,&rect);
-		SDL_Flip(screen);
+		SDL_BlitSurface(object.image,NULL,board.screen,&rect);
+		SDL_Flip(board.screen);
 		SDL_Delay(3);
 	}
 }
 
-void rotate_in_graphic(Board board,Object& obj1,Object& obj2,SDL_Surface*& screen)
+void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
 {
 	cout << "======= rotate in graphic =====" << endl;
 	cout << "obj1:  " << obj1.i << " " << obj1.j << endl;
@@ -140,7 +140,7 @@ void rotate_in_graphic(Board board,Object& obj1,Object& obj2,SDL_Surface*& scree
 		{
 			if(!checked)
 			{
-				dump_board_without(board,obj1,obj2,screen);
+				dump_board_without(board,obj1,obj2);
 				checked = true;
 			}
 			if(rect1.x < obj2.j*50)
@@ -152,7 +152,7 @@ void rotate_in_graphic(Board board,Object& obj1,Object& obj2,SDL_Surface*& scree
 				rect1.y += 1;
 			else if(rect1.y > obj2.i*50)
 				rect1.y -= 1;
-			SDL_BlitSurface(obj1.image,NULL,screen,&rect1);
+			SDL_BlitSurface(obj1.image,NULL,board.screen,&rect1);
 		}
 		else
 			break;
@@ -161,7 +161,7 @@ void rotate_in_graphic(Board board,Object& obj1,Object& obj2,SDL_Surface*& scree
 		{
 			if(!checked)
 			{
-				dump_board_without(board,obj1,obj2,screen);
+				dump_board_without(board,obj1,obj2);
 				checked = true;
 			}
 			
@@ -174,51 +174,51 @@ void rotate_in_graphic(Board board,Object& obj1,Object& obj2,SDL_Surface*& scree
 				rect2.y += 1;
 			else if(rect2.y > obj1.i*50)
 				rect2.y -= 1;
-			SDL_BlitSurface(obj2.image,NULL,screen,&rect2);
+			SDL_BlitSurface(obj2.image,NULL,board.screen,&rect2);
 		}
 		else
 			break;
 
 		checked = false;
-		SDL_Flip(screen);
+		SDL_Flip(board.screen);
 		SDL_Delay(3);
 		
 	}
 }
 
-void remove_object_from_screen(Board board,Object object,SDL_Surface*& screen)
+void remove_object_from_screen(Board& board,Object object)
 {
 	SDL_Rect rect;
 	rect.x = object.j*50;
 	rect.y = object.i*50;
 	rect.h = 59;
 	rect.w = 59;
-	SDL_FillRect(screen,&rect,0x000000);
-	SDL_Flip(screen);
+	SDL_FillRect(board.screen,&rect,0x000000);
+	SDL_Flip(board.screen);
 }
 
-void reload_screen(Board board,SDL_Surface*& screen)
+void reload_screen(Board& board)
 {
 	SDL_Rect rect;
 	rect.h = SCREEN_HEIGHT;
 	rect.w = SCREEN_WIDTH;
-	SDL_FillRect(screen,NULL,0x000000);
+	SDL_FillRect(board.screen,NULL,0x000000);
 	for(int i = 0; i < board.row_count; i++)
 		for(int j = 0; j < board.column_count; j++)
-			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
-	SDL_Flip(screen);
+			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
+	SDL_Flip(board.screen);
 }
 
 
-bool init_screen(SDL_Surface*& screen, Board& board)
+bool init_screen(Board& board)
 {
 	if(SDL_Init(SDL_INIT_EVERYTHING) == -1)
 	{
 		cout << "coudln't init" << endl;
 		return false;
 	}
-	screen = SDL_SetVideoMode(SCREEN_WIDTH,SCREEN_HEIGHT,SCREEN_BPP,SDL_SWSURFACE);
-	if(screen == NULL)
+	board.screen = SDL_SetVideoMode(SCREEN_WIDTH,SCREEN_HEIGHT,SCREEN_BPP,SDL_SWSURFACE);
+	if(board.screen == NULL)
 	{
 		cout << "set video mode failed:  " << endl;
 		cout << SDL_GetError() << endl;
@@ -226,7 +226,6 @@ bool init_screen(SDL_Surface*& screen, Board& board)
 	}
 
 	SDL_WM_SetCaption("Krush",NULL);
-	cout << "[init_scree] is null:  " << (screen == NULL) << endl;
 	SDL_Surface* blue = load_image("img/b.bmp");
 	SDL_Surface* red = load_image("img/r.bmp");
 	SDL_Surface* green = load_image("img/g.bmp");
@@ -255,8 +254,6 @@ bool init_screen(SDL_Surface*& screen, Board& board)
 				board.objects[i][j].image = green;
 				break;
 			case 'o':
-				cout << "[o colors]:  " << endl;
-				cout << i << " " << j << endl;
 				board.objects[i][j].image = orange;
 				break;
 			case 'y':
@@ -264,14 +261,10 @@ bool init_screen(SDL_Surface*& screen, Board& board)
 				break;
 		  }
 
-			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
+			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
 	 }
 
-	SDL_Flip(screen);
-
-
-	
-
+	SDL_Flip(board.screen);
 	return true;
 }
 

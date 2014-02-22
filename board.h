@@ -35,6 +35,7 @@ typedef struct Board {
 	vector < vector < Object > > objects;
 	SDL_Surface* selected_object;
 	SDL_Surface* images[5];
+	SDL_Surface* screen;
 } Board;
 
 void init_board(Board&);
