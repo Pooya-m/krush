@@ -226,18 +226,12 @@ bool init_screen(Board& board)
 	}
 
 	SDL_WM_SetCaption("Krush",NULL);
-	SDL_Surface* blue = load_image("img/b.bmp");
-	SDL_Surface* red = load_image("img/r.bmp");
-	SDL_Surface* green = load_image("img/g.bmp");
-	SDL_Surface* orange = load_image("img/o.bmp");
-	SDL_Surface* yellow = load_image("img/y.bmp");
-	SDL_Surface* dark = load_image("img/dark.bmp");
-	board.images[0] = red;
-	board.images[1] = blue;
-	board.images[2] = green;
-	board.images[3] = yellow;
-	board.images[4] = orange;
-	board.selected_object = dark;
+	board.images[0] = load_image("img/r.bmp");
+	board.images[1] = load_image("img/b.bmp");
+	board.images[2] = load_image("img/g.bmp");
+	board.images[3] = load_image("img/y.bmp");
+	board.images[4] = load_image("img/o.bmp");
+	board.selected_object = load_image("img/dark.bmp");
 	
 	for(int i = 0; i < board.row_count ; i++)
 		for(int j = 0; j < board.column_count; j++)
@@ -245,19 +239,19 @@ bool init_screen(Board& board)
 			switch(board.objects[i][j].color)
 			{
 			case 'b':
-				board.objects[i][j].image = blue;
+				board.objects[i][j].image = board.images[1];
 				break;
 			case 'r':
-				board.objects[i][j].image = red;
+				board.objects[i][j].image = board.images[0];
 				break;
 			case 'g':
-				board.objects[i][j].image = green;
+				board.objects[i][j].image = board.images[2];
 				break;
 			case 'o':
-				board.objects[i][j].image = orange;
+				board.objects[i][j].image = board.images[4];
 				break;
 			case 'y':
-				board.objects[i][j].image = yellow;
+				board.objects[i][j].image = board.images[3];
 				break;
 		  }
 

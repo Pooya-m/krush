@@ -65,14 +65,11 @@ bool rotatable(Board board, Object obj1,Object obj2)
 	board.objects[i][j] = obj2;
 	board.objects[ii][jj] = temp;
 
-  /* because of passed by value */
 	board.objects[i][j].i = board.objects[i][j].i + board.objects[ii][jj].i - (board.objects[ii][jj].i = board.objects[i][j].i);
 	board.objects[i][j].j = board.objects[i][j].j + board.objects[ii][jj].j - (board.objects[ii][jj].j = board.objects[i][j].j);
 	obj1.i = obj1.i + obj2.i - (obj2.i = obj1.i);
 	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);
-	/* */
 	
-//	if(abs(obj1.i - obj2.i) > 1 or abs(obj1.j - obj2.j) > 1)
 	if((pow((obj1.i - obj2.i),2) + pow((obj1.j - obj2.j),2)) > 1)
 		return false;
 	if(count_sames_in_column(board, obj1) >= 3 or count_sames_in_row(board, obj1) >= 3)
@@ -85,17 +82,6 @@ bool rotatable(Board board, Object obj1,Object obj2)
 void rotate(Board& board,Object& obj1,Object& obj2)
 {
 	rotate_in_graphic(board,obj1,obj2);
-	/*int i = obj1.i,j = obj1.j;
-	int ii = obj2.i,jj = obj2.j;
-
-	Object temp = obj1;
-	board.objects[i][j] = obj2;
-	board.objects[ii][jj] = temp;
-	
-
-	obj1.i = obj1.i + obj2.i - (obj2.i = obj1.i);
-	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);*/
-
 	int i = obj1.i,j = obj1.j;
 	int ii = obj2.i,jj = obj2.j;
 	Object temp = obj1;
@@ -103,12 +89,11 @@ void rotate(Board& board,Object& obj1,Object& obj2)
 	board.objects[i][j] = obj2;
 	board.objects[ii][jj] = temp;
 
-  /* because of passed by value */
 	board.objects[i][j].i = board.objects[i][j].i + board.objects[ii][jj].i - (board.objects[ii][jj].i = board.objects[i][j].i);
 	board.objects[i][j].j = board.objects[i][j].j + board.objects[ii][jj].j - (board.objects[ii][jj].j = board.objects[i][j].j);
+	
 	obj1.i = obj1.i + obj2.i - (obj2.i = obj1.i);
 	obj1.j = obj1.j + obj2.j - (obj2.j = obj1.j);
-	/* */
 	
 }
 
@@ -144,7 +129,6 @@ Object get_random_object(Board board)
 {
 	Object object;
 	double random_weight;
-	//srand(time(NULL));
 	random_weight = (rand() / ((double) RAND_MAX + 1.0));
 	double sum = 0;
 	for(int i = 0; i < COLORS_COUNT; i++)
@@ -176,7 +160,6 @@ void shift_down(Board& board, int column, int row_start, int row_end, int offset
 		board.objects[i][column].image = temp.image;
 	}
 }
-
 
 vector <Object> get_objects(Block block)
 {
@@ -289,6 +272,7 @@ void free_everything(Board& board)
 {
 	for(int i = 0; i < 5; i++)
 		free(board.images[i]);
+	free(board.selected_object);
 	SDL_FreeSurface(board.screen);
 }
 

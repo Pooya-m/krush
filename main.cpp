@@ -13,7 +13,6 @@ int main(int argc,char* args[])
 	SDL_Surface* screen = NULL;
 	SDL_Event event;
 	vector <Object> selected_objects;
-	int click = 0;
 
 	srand(time(NULL));
 	init_board(board);
