@@ -210,8 +210,7 @@ void blow_out(Board& board, vector < Block > blocks)
 		else
 			i++;
 	}
-
-	SDL_Delay(1000);
+	SDL_Delay(500);
 	for(int i = 0; i < objects.size(); i++)
 	{
 		remove_object_from_screen(board,objects[i]);
@@ -219,7 +218,10 @@ void blow_out(Board& board, vector < Block > blocks)
 	}
 	SDL_Delay(1000);
 	reload_screen(board);
+	board.score += objects.size();
 
+	cout << "new score:  " << board.score << endl;
+	
 	cout << "after blow:  " << endl;
 	dump_board(board);
 	cout << endl;
@@ -247,12 +249,22 @@ void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2)
 	blocks.push_back(get_duplicates_block(board,obj1));
 	blocks.push_back(get_duplicates_block(board,obj2));
 	blow_out(board,blocks);
+	reload_screen(board);
+	if(is_over(board))
+	{
+		cout << ">>>>> refilling the board <<<<<" << endl;
+		refill_board(board);
+	}
+	else
+	{
+		cout << "still can move on! :D" << endl;
+	}
 }
 
 void handle_mouse_event(Board& board,SDL_Event event,vector <Object>& selected_objects)
 {
 	if(event.button.button == SDL_BUTTON_LEFT )
-	{
+ 	{
 		select_object(board,event,selected_objects);
 		if(selected_objects.size() == 2)
 		{
@@ -268,12 +280,61 @@ void handle_mouse_event(Board& board,SDL_Event event,vector <Object>& selected_o
 	}
 }
 
+bool is_over(Board board)
+{
+	for(int i = 0; i < board.row_count; i++)
+		for(int j = 0; j < board.column_count;j++)
+		{
+			if(j+1 < board.column_count)
+				if(rotatable(board,board.objects[i][j],board.objects[i][j+1]))
+					return false;
+			if(j-1 >= 0)
+				if(rotatable(board,board.objects[i][j],board.objects[i][j-1]))
+					return false;
+			if(i+1 < board.row_count)
+				if(rotatable(board,board.objects[i][j],board.objects[i+1][j]))
+					return false;
+			if(i-1 >= 0)
+				if(rotatable(board,board.objects[i][j],board.objects[i-1][j]))
+					return false;
+		}
+	return true;
+}
+
+void refill_board(Board& board)
+{
+	Object temp;
+	for(int i = 0; i < board.row_count; i++)
+		for(int j = 0; j < board.column_count; j++)
+		{
+			temp = get_random_object(board);
+			board.objects[i][j].color = temp.color;
+			board.objects[i][j].image = temp.image;
+		}
+	reload_screen(board);
+
+	vector <Block> blocks;
+	for(int i = 0; i < board.row_count; i++)
+		for(int j = 0; j < board.column_count; j++)
+			blocks.push_back(get_duplicates_block(board,board.objects[i][j]));
+	blow_out(board,blocks);
+}
+
 void free_everything(Board& board)
 {
 	for(int i = 0; i < 5; i++)
 		free(board.images[i]);
 	free(board.selected_object);
 	SDL_FreeSurface(board.screen);
+}
+
+bool init_game(Game& game)
+{
+	game.quit = false;
+	game.time = 60;
+	init_board(game.board);
+	if(!init_screen(game.board))
+		return false;
 }
 
 

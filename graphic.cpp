@@ -7,8 +7,7 @@ void apply_surface(int x, int y,SDL_Surface*& source,SDL_Surface*& destination)
 	SDL_Rect offset;
 	offset.x = x;
 	offset.y = y;
-	SDL_BlitSurface(source,NULL,destination,&offset);
-	
+	SDL_BlitSurface(source,NULL,destination,&offset);	
 }
 
 bool is_valid_click(Board board, SDL_Event event)
@@ -73,7 +72,8 @@ void dump_board_without(Board& board, Object obj1,Object obj2)
 			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
 			}
 
-	SDL_Flip(board.screen); 
+	show_score(board);
+	dump_time(board);
 }
 
 void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& screen)
@@ -96,7 +96,9 @@ void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& scree
 			}
 			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
 	 }
-	SDL_Flip(screen); 
+
+	show_score(board);
+	dump_time(board);
 }
 
 void move_to(Board& board,Object& object, vector <Object> removed_objects,int dest_x, int dest_y)
@@ -182,7 +184,6 @@ void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
 		checked = false;
 		SDL_Flip(board.screen);
 		SDL_Delay(3);
-		
 	}
 }
 
@@ -206,7 +207,8 @@ void reload_screen(Board& board)
 	for(int i = 0; i < board.row_count; i++)
 		for(int j = 0; j < board.column_count; j++)
 			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
-	SDL_Flip(board.screen);
+	show_score(board);
+	dump_time(board);
 }
 
 
@@ -224,6 +226,13 @@ bool init_screen(Board& board)
 		cout << SDL_GetError() << endl;
 		return false;
 	}
+
+	if(TTF_Init() == -1)
+		return false;
+
+	board.font = TTF_OpenFont(FONT_NAME,FONT_SIZE);
+	if(board.font == NULL)
+		return false;
 
 	SDL_WM_SetCaption("Krush",NULL);
 	board.images[0] = load_image("img/r.bmp");
@@ -258,7 +267,8 @@ bool init_screen(Board& board)
 			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
 	 }
 
-	SDL_Flip(board.screen);
+	board.time = SDL_GetTicks();
+	reload_screen(board);
 	return true;
 }
 
@@ -279,6 +289,34 @@ SDL_Surface* load_image(string file_name)
 		cout << SDL_GetError() << endl;
 	}
 	return image;
+}
+
+void render_text(Board& board, int x, int y,string message,SDL_Color color)
+{
+	SDL_Surface* message_surface = TTF_RenderText_Solid(board.font,message.c_str(),color);
+	apply_surface(x,y,message_surface,board.screen);
+	SDL_Flip(board.screen);
+	SDL_FreeSurface(message_surface);
+}
+
+void show_score(Board& board)
+{
+	SDL_Color color = SCORE_VALUE_COLOR;
+	render_text(board,SCORE_X,SCORE_Y,"Score: "+to_string(board.score),color);
+}
+
+void dump_time(Board& board)
+{
+	SDL_Rect rect;
+	rect.x = SCORE_X+100;
+	rect.y = SCORE_Y+100;
+	rect.h = 50;
+	rect.w = 50;
+	SDL_FillRect(board.screen,&rect,0x000000);
+	SDL_Flip(board.screen);
+	SDL_Color color = SCORE_VALUE_COLOR;
+	int time = (SDL_GetTicks() - board.time) / 1000;
+	render_text(board,rect.x,rect.y,to_string(time),color);
 }
 
 

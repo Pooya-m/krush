@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdlib>
 #include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
 
 #define COLORS_COUNT 5
 #define TYPE_NORMAL 0
@@ -36,6 +37,9 @@ typedef struct Board {
 	SDL_Surface* selected_object;
 	SDL_Surface* images[5];
 	SDL_Surface* screen;
+	int score;
+	TTF_Font* font;
+	int time;
 } Board;
 
 void init_board(Board&);

@@ -8,29 +8,27 @@ using namespace std;
 
 int main(int argc,char* args[])
 {
-	bool quit = false;
-	Board board;
-	SDL_Surface* screen = NULL;
+	Game game;
 	SDL_Event event;
 	vector <Object> selected_objects;
-
 	srand(time(NULL));
-	init_board(board);
-	init_screen(board);
-	while(!quit)
+	init_game(game);
+
+	while(!game.quit)
 	{
-		while(SDL_WaitEvent(&event))
+		dump_time(game.board);
+		while(SDL_PollEvent(&event))
 		{
 			if(event.type == SDL_QUIT)
 			{
-				quit = true;
+				game.quit = true;
 				break;
 			}
 			if(event.type == SDL_MOUSEBUTTONDOWN)
-				handle_mouse_event(board,event,selected_objects);
+				handle_mouse_event(game.board,event,selected_objects);
 		}
 	}
-	free_everything(board);
+	free_everything(game.board);
 	return 0;
 }
 

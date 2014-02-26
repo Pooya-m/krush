@@ -1,6 +1,12 @@
 #include "board.h"
-#include "parser.h"
 #include "graphic.h"
+
+typedef struct Game {
+	Board board;
+	bool quit;
+	int time;
+	
+} Game;
 
 void set_sames_bounds_in_row(Board board, Object, int& , int&);
 void set_sames_bounds_in_column(Board board, Object, int&, int&);
@@ -18,5 +24,9 @@ bool compare(Object,Object);
 void blow_out(Board&,vector <Block>);
 void rotate_and_blow_out(Board&,Object&,Object&);
 void handle_mouse_event(Board&,SDL_Event,vector<Object>&);
+bool is_over(Board);
+void refill_board(Board&);
+bool init_game(Game& game);
 void free_everything(Board&);
+
 

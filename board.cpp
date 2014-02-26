@@ -8,6 +8,7 @@ void init_board(Board& board)
 	board.colors[2] = 'g';
 	board.colors[3] = 'y';
 	board.colors[4] = 'o';
+	board.score = 0;
 	
 	cin >> board.row_count >> board.column_count;
 
@@ -18,7 +19,7 @@ void init_board(Board& board)
 	board.objects.resize(board.row_count);
 	for(int i = 0; i < board.row_count; i++)
 		board.objects[i].resize(board.column_count);
-
+		
 	fill_board(board);
 }
 
