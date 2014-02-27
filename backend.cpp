@@ -333,7 +333,6 @@ void free_everything(Board& board)
 bool init_game(Game& game)
 {
 	game.quit = false;
-	game.time = 60;
 	init_board(game.board);
 	if(!init_screen(game.board))
 		return false;

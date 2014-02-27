@@ -9,6 +9,7 @@
 
 #define COLORS_COUNT 5
 #define TYPE_NORMAL 0
+#define TOTAL_TIME 60
 
 using namespace std;
 
@@ -37,9 +38,9 @@ typedef struct Board {
 	SDL_Surface* selected_object;
 	SDL_Surface* images[5];
 	SDL_Surface* screen;
-	int score;
 	TTF_Font* font;
 	int time;
+	int score;
 } Board;
 
 void init_board(Board&);

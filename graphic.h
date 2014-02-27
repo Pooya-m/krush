@@ -11,8 +11,8 @@ using namespace std;
 #define FONT_NAME "arial.ttf"
 #define FONT_SIZE 30
 #define SCORE_VALUE_COLOR {255,255,255}
-#define SCORE_X 0
-#define SCORE_Y 300
+#define INFO_X_OFFSET 0
+#define INFO_Y_OFFSET 30
 #define IMAGE_HEIGHT 50
 #define IMAGE_WIDTH 50
 

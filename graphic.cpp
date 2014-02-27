@@ -279,8 +279,6 @@ bool init_screen(Board& board)
 
 			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
 	 }
-
-	board.time = SDL_GetTicks();
 	reload_screen(board);
 	return true;
 }
@@ -315,21 +313,20 @@ void render_text(Board& board, int x, int y,string message,SDL_Color color)
 void show_score(Board& board)
 {
 	SDL_Color color = SCORE_VALUE_COLOR;
-	render_text(board,SCORE_X,SCORE_Y,"Score: "+to_string(board.score),color);
+	render_text(board,INFO_X_OFFSET,(board.row_count * IMAGE_WIDTH) + INFO_Y_OFFSET,"Score: "+to_string(board.score),color);
 }
 
 void dump_time(Board& board)
 {
 	SDL_Rect rect;
-	rect.x = SCORE_X+100;
-	rect.y = SCORE_Y+100;
-	rect.h = 50;
-	rect.w = 50;
+	rect.x = INFO_X_OFFSET;
+	rect.y = (board.column_count * IMAGE_HEIGHT) + INFO_Y_OFFSET;
+	rect.h = IMAGE_HEIGHT+10;
+	rect.w = IMAGE_WIDTH;
 	SDL_FillRect(board.screen,&rect,0x000000);
 	SDL_Flip(board.screen);
 	SDL_Color color = SCORE_VALUE_COLOR;
-	int time = (SDL_GetTicks() - board.time) / 1000;
-	render_text(board,rect.x,rect.y,to_string(time),color);
+	render_text(board,rect.x,rect.y+30,to_string(TOTAL_TIME - board.time),color);
 }
 
 

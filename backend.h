@@ -3,9 +3,7 @@
 
 typedef struct Game {
 	Board board;
-	bool quit;
-	int time;
-	
+	bool quit;	
 } Game;
 
 void set_sames_bounds_in_row(Board board, Object, int& , int&);

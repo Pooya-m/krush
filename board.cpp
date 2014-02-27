@@ -9,6 +9,7 @@ void init_board(Board& board)
 	board.colors[3] = 'y';
 	board.colors[4] = 'o';
 	board.score = 0;
+	board.time = 60;
 	
 	cin >> board.row_count >> board.column_count;
 

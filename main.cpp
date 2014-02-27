@@ -3,7 +3,6 @@
 #include "backend.h"
 #include "graphic.h"
 #include <cstdlib>
-
 using namespace std;
 
 int main(int argc,char* args[])
@@ -17,6 +16,13 @@ int main(int argc,char* args[])
 	while(!game.quit)
 	{
 		dump_time(game.board);
+		game.board.time = (SDL_GetTicks() / 1000);
+		if(game.board.time >= TOTAL_TIME)
+		{
+			cout << "time is up!" << endl;
+			return 0;
+		}
+		
 		while(SDL_PollEvent(&event))
 		{
 			if(event.type == SDL_QUIT)
