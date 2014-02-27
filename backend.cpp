@@ -137,7 +137,7 @@ Object get_random_object(Board board)
 		if(random_weight < sum)
 		{
 			object.color = board.colors[i];
-			object.image = board.images[i];
+			object.image = board.resources.bomb_images[i];
 			return object;
 		}
 	}
@@ -216,7 +216,8 @@ void blow_out(Board& board, vector < Block > blocks)
 		remove_object_from_screen(board,objects[i]);
 		shift_down(board,objects[i].j,0,objects[i].i-1,1);
 	}
-	Mix_PlayChannel( -1,board.blow, 0 );
+	
+	Mix_PlayChannel(-1,board.resources.blowing_out_sound, 0 );
 	SDL_Delay(1000);
 	reload_screen(board);
 	board.score += objects.size();
@@ -238,7 +239,10 @@ void blow_out(Board& board, vector < Block > blocks)
 void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2)
 {
 	if(rotatable(board,obj1,obj2))
+	{
+		play_sound(board.resources.laser_sound);
 		rotate(board,obj1,obj2);
+	}
 	else
 	{
 		cout << "not rotatable" << endl;
@@ -326,12 +330,12 @@ void refill_board(Board& board)
 void free_everything(Board& board)
 {
 	for(int i = 0; i < 5; i++)
-		free(board.images[i]);
-	free(board.selected_object);
+		free(board.resources.bomb_images[i]);
+	free(board.resources.selected_object_image);
 	SDL_FreeSurface(board.screen);
-	Mix_FreeChunk(board.blow);
-	Mix_FreeMusic(board.music);
-	TTF_CloseFont(board.font);
+	Mix_FreeChunk(board.resources.blowing_out_sound);
+	Mix_FreeMusic(board.resources.background_music);
+	TTF_CloseFont(board.resources.font);
 	Mix_CloseAudio();
 	TTF_Quit();
 }
@@ -343,7 +347,7 @@ bool init_game(Game& game)
 		return false;
 	if(!init_screen(game.board))
 		return false;
-
+	play_background_music(game.board.resources);
 	return true;
 }
 

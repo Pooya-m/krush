@@ -1,12 +1,13 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
+#include "SDL/SDL.h"
+#include "SDL/SDL_mixer.h"
+#include "SDL/SDL_ttf.h"
+#include "resource.h"
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
-#include "SDL/SDL_mixer.h"
 
 #define COLORS_COUNT 5
 #define TYPE_NORMAL 0
@@ -23,10 +24,6 @@ typedef struct Object {
 } Object;
 
 typedef struct Block {
-	//int column;
-	//int row_start;
-	//int row_end;
-	//vector < string > sub_blocks;
 	vector < vector < Object > > sub_blocks;
 } Block;
 
@@ -36,15 +33,10 @@ typedef struct Board {
 	int row_count;
 	int column_count;
 	vector < vector < Object > > objects;
-	SDL_Surface* selected_object;
-	SDL_Surface* images[5];
 	SDL_Surface* screen;
-	TTF_Font* font;
 	int time;
 	int score;
-
-	Mix_Music* music;
-	Mix_Chunk* blow;
+	Resource resources;
 } Board;
 
 bool init_board(Board&);

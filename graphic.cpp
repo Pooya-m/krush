@@ -7,7 +7,7 @@ void apply_surface(int x, int y,SDL_Surface*& source,SDL_Surface*& destination)
 	SDL_Rect offset;
 	offset.x = x;
 	offset.y = y;
-	SDL_BlitSurface(source,NULL,destination,&offset);	
+	SDL_BlitSurface(source,NULL,destination,&offset);
 }
 
 bool is_valid_click(Board board, SDL_Event event)
@@ -51,7 +51,7 @@ bool select_object(Board& board, SDL_Event event,vector <Object>& selected_objec
 											
 	cout << "selected:  " << endl;
 	cout << y / 50 << " " << x / 50 << endl;
-	apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.selected_object,board.screen);
+	apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.resources.selected_object_image,board.screen);
 	SDL_Flip(board.screen);
 	selected_objects.push_back(board.objects[y/IMAGE_HEIGHT][x/IMAGE_WIDTH]);
 	return true;
@@ -87,32 +87,7 @@ void dump_board_without(Board& board, Object obj1,Object obj2)
 
 	show_score(board);
 	dump_time(board);
-}
-
-void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& screen)
-{
-	SDL_Rect rect;
-	rect.h = SCREEN_HEIGHT;
-	rect.w = SCREEN_WIDTH;
-	SDL_FillRect(screen,NULL,0x000000);
-	bool check = false;
-	for(int i = 0; i < board.row_count; i++)
-		for(int j = 0; j < board.column_count; j++)
-		{
-			for(int k = 0; k < objects.size(); k++)
-				if(objects[k].i == i and objects[k].j == j)
-					check = true;
-			if(check)
-			{
-				check = false;
-				continue;
-			}
-			apply_surface(j*IMAGE_WIDTH,i*IMAGE_HEIGHT,board.objects[i][j].image,screen);
-	 }
-
-	show_score(board);
-	dump_time(board);
-}
+	}
 
 void move_to(Board& board,Object& object, vector <Object> removed_objects,int dest_x, int dest_y)
 {
@@ -121,7 +96,7 @@ void move_to(Board& board,Object& object, vector <Object> removed_objects,int de
 	rect.y = object.i * IMAGE_HEIGHT;
 	while((rect.x != dest_x) or (rect.y != dest_y))
 	{
-		dump_board_without(board,removed_objects,board.screen);
+		dump_board_without(board,removed_objects[0],removed_objects[1]);
 		if(rect.x < dest_x)
 			rect.x += 1;
 		else if(rect.x > dest_x)
@@ -240,46 +215,41 @@ bool init_screen(Board& board)
 		return false;
 	}
 
-	if(TTF_Init() == -1)
+	if(!init_resources(board.resources))
+	{
+		cout << "couldn't init resources" << endl;
 		return false;
-
-	board.font = TTF_OpenFont(FONT_NAME,FONT_SIZE);
-	if(board.font == NULL)
-		return false;
+	}
 
 	SDL_WM_SetCaption("Krush",NULL);
-	board.images[0] = load_image("img/r.bmp");
-	board.images[1] = load_image("img/b.bmp");
-	board.images[2] = load_image("img/g.bmp");
-	board.images[3] = load_image("img/y.bmp");
-	board.images[4] = load_image("img/o.bmp");
-	board.selected_object = load_image("img/dark.bmp");
-	
-	for(int i = 0; i < board.row_count ; i++)
+
+		for(int i = 0; i < board.row_count ; i++)
 		for(int j = 0; j < board.column_count; j++)
 		{
 			switch(board.objects[i][j].color)
 			{
 			case 'b':
-				board.objects[i][j].image = board.images[1];
+				board.objects[i][j].image = board.resources.bomb_images[1];
 				break;
 			case 'r':
-				board.objects[i][j].image = board.images[0];
+				board.objects[i][j].image = board.resources.bomb_images[0];
 				break;
 			case 'g':
-				board.objects[i][j].image = board.images[2];
+				board.objects[i][j].image = board.resources.bomb_images[2];
 				break;
 			case 'o':
-				board.objects[i][j].image = board.images[4];
+				board.objects[i][j].image = board.resources.bomb_images[4];
 				break;
 			case 'y':
-				board.objects[i][j].image = board.images[3];
+				board.objects[i][j].image = board.resources.bomb_images[3];
 				break;
 		  }
-
-			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
-	 }
-	reload_screen(board);
+				apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
+			}
+		
+		//apply_surface(0,0,board.objects[0][0].image,board.screen);
+		reload_screen(board);
+		//apply_surface(100,100,board.resources.bomb_images[2],board.screen);
 	return true;
 }
 
@@ -304,7 +274,7 @@ SDL_Surface* load_image(string file_name)
 
 void render_text(Board& board, int x, int y,string message,SDL_Color color)
 {
-	SDL_Surface* message_surface = TTF_RenderText_Solid(board.font,message.c_str(),color);
+	SDL_Surface* message_surface = TTF_RenderText_Solid(board.resources.font,message.c_str(),color);
 	apply_surface(x,y,message_surface,board.screen);
 	SDL_Flip(board.screen);
 	SDL_FreeSurface(message_surface);
@@ -326,7 +296,7 @@ void dump_time(Board& board)
 	SDL_FillRect(board.screen,&rect,0x000000);
 	SDL_Flip(board.screen);
 	SDL_Color color = SCORE_VALUE_COLOR;
-	render_text(board,rect.x,rect.y+30,to_string(TOTAL_TIME - board.time),color);
+	render_text(board,rect.x,rect.y,to_string(TOTAL_TIME - board.time),color);
 }
 
 

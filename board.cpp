@@ -10,29 +10,7 @@ bool init_board(Board& board)
 	board.colors[4] = 'o';
 	board.score = 0;
 	board.time = 60;
-	board.music = NULL;
-	board.blow = NULL;
 
-	if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
-	{
-		cout << "fuck that" << endl;
-		return false;
-	}
-	
-	board.music = Mix_LoadMUS("theme_sound.mp3");
-	if(board.music == NULL)
-	{
-		cout << "theme sound not found!" << endl;
-		return false;
-	}
-
-	board.blow = Mix_LoadWAV("bomb.wav");
-	if(board.blow == NULL)
-	{
-		cout << Mix_GetError() << endl;
-		cout << "bomb wav not found!" << endl;
-		return false;
-	}
 
 	cin >> board.row_count >> board.column_count;
 
