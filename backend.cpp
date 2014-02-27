@@ -265,7 +265,9 @@ void handle_mouse_event(Board& board,SDL_Event event,vector <Object>& selected_o
 {
 	if(event.button.button == SDL_BUTTON_LEFT )
  	{
-		select_object(board,event,selected_objects);
+		if(!select_object(board,event,selected_objects))
+			selected_objects.clear();
+		
 		if(selected_objects.size() == 2)
 		{
 			if(rotatable(board,selected_objects[0],selected_objects[1]))

@@ -13,11 +13,13 @@ using namespace std;
 #define SCORE_VALUE_COLOR {255,255,255}
 #define SCORE_X 0
 #define SCORE_Y 300
+#define IMAGE_HEIGHT 50
+#define IMAGE_WIDTH 50
 
 
 bool init_screen(Board&);
 void apply_surface(int x, int y,SDL_Surface*&, SDL_Surface*& );
-void select_object(Board&,SDL_Event,vector<Object>& selected_objects);
+bool select_object(Board&,SDL_Event,vector<Object>& selected_objects);
 void unselect_object(Board&,Object);
 void rotate_in_graphic(Board&,Object&,Object&);
 bool is_valid_click(Board,SDL_Event);

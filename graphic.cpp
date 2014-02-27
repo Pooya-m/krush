@@ -15,9 +15,9 @@ bool is_valid_click(Board board, SDL_Event event)
 	int x = event.button.x;
 	int y = event.button.y;
 
-	if((y / 50) > board.row_count)
+	if((y / IMAGE_HEIGHT) >= board.row_count)
 		return false;
-	if((x / 50) > board.column_count)
+	if((x / IMAGE_WIDTH) >= board.column_count)
 		return false;
 	if(x < 0)
 		return false;
@@ -27,30 +27,43 @@ bool is_valid_click(Board board, SDL_Event event)
 	return true;
 }
 
-void select_object(Board& board, SDL_Event event,vector <Object>& selected_objects)
+bool select_object(Board& board, SDL_Event event,vector <Object>& selected_objects)
 {
 	if(!is_valid_click(board,event))
 	{
 		cout << "not a valid click!" << endl;
-		return;
+		for(int i = 0; i < selected_objects.size(); i++)
+			unselect_object(board,selected_objects[i]);
+		return false;
 	}
 	
 	int x = event.button.x;
 	int y = event.button.y;
-//	cout << "selected:  " << endl;
-//	cout << y / 50 << " " << x / 50 << endl;
-	apply_surface((x / 50) * 50, (y / 50) * 50,board.selected_object,board.screen);
+
+	for(int i = 0; i < selected_objects.size(); i++)
+	{
+		if(selected_objects[i].i == y / IMAGE_HEIGHT and selected_objects[i].j == x / IMAGE_WIDTH)
+		{
+			unselect_object(board,selected_objects[i]);
+			return false;
+		}
+	}
+											
+	cout << "selected:  " << endl;
+	cout << y / 50 << " " << x / 50 << endl;
+	apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.selected_object,board.screen);
 	SDL_Flip(board.screen);
-	selected_objects.push_back(board.objects[y/50][x/50]);
+	selected_objects.push_back(board.objects[y/IMAGE_HEIGHT][x/IMAGE_WIDTH]);
+	return true;
 }
 
 void unselect_object(Board& board,Object object)
 {
 		SDL_Rect rect;
-   	rect.x = object.j * 50;
-		rect.y = object.i * 50;
-		rect.h = 50;
-		rect.w = 50;
+   	rect.x = object.j * IMAGE_WIDTH;
+		rect.y = object.i * IMAGE_HEIGHT;
+		rect.h = IMAGE_HEIGHT;
+		rect.w = IMAGE_WIDTH;
 		SDL_FillRect(board.screen,&rect,0x000000);
 		apply_surface(rect.x,rect.y,object.image,board.screen);
 		SDL_Flip(board.screen);
@@ -69,7 +82,7 @@ void dump_board_without(Board& board, Object obj1,Object obj2)
 				continue;
 			if(obj2.i == i and obj2.j == j)
 				continue;
-			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
+			apply_surface(j*IMAGE_WIDTH,i*IMAGE_HEIGHT,board.objects[i][j].image,board.screen);
 			}
 
 	show_score(board);
@@ -94,7 +107,7 @@ void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& scree
 				check = false;
 				continue;
 			}
-			apply_surface(j*50,i*50,board.objects[i][j].image,screen);
+			apply_surface(j*IMAGE_WIDTH,i*IMAGE_HEIGHT,board.objects[i][j].image,screen);
 	 }
 
 	show_score(board);
@@ -104,8 +117,8 @@ void dump_board_without(Board board,vector <Object> objects, SDL_Surface*& scree
 void move_to(Board& board,Object& object, vector <Object> removed_objects,int dest_x, int dest_y)
 {
 	SDL_Rect rect;
-	rect.x = object.j * 50;
-	rect.y = object.i * 50;
+	rect.x = object.j * IMAGE_WIDTH;
+	rect.y = object.i * IMAGE_HEIGHT;
 	while((rect.x != dest_x) or (rect.y != dest_y))
 	{
 		dump_board_without(board,removed_objects,board.screen);
@@ -131,35 +144,35 @@ void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
 	cout << "obj2:  " << obj2.i << " " << obj2.j << endl;
 	cout << endl;
 	SDL_Rect rect1,rect2;
-	rect1.x = obj1.j * 50;
-	rect1.y = obj1.i * 50;
-	rect2.x = obj2.j * 50;
-	rect2.y = obj2.i* 50;
+	rect1.x = obj1.j * IMAGE_WIDTH;
+	rect1.y = obj1.i * IMAGE_HEIGHT;
+	rect2.x = obj2.j * IMAGE_WIDTH;
+	rect2.y = obj2.i* IMAGE_HEIGHT;
 	bool checked = false;
 	while(true)
 	{
-		if((rect1.x != obj2.j*50) or (rect1.y != obj2.i*50))
+		if((rect1.x != obj2.j*IMAGE_WIDTH) or (rect1.y != obj2.i*IMAGE_HEIGHT))
 		{
 			if(!checked)
 			{
 				dump_board_without(board,obj1,obj2);
 				checked = true;
 			}
-			if(rect1.x < obj2.j*50)
+			if(rect1.x < obj2.j*IMAGE_WIDTH)
 				rect1.x += 1;
-			else if(rect1.x > obj2.j*50)
+			else if(rect1.x > obj2.j*IMAGE_WIDTH)
 				rect1.x -= 1;
 
-			if(rect1.y < obj2.i*50)
+			if(rect1.y < obj2.i*IMAGE_HEIGHT)
 				rect1.y += 1;
-			else if(rect1.y > obj2.i*50)
+			else if(rect1.y > obj2.i*IMAGE_HEIGHT)
 				rect1.y -= 1;
 			SDL_BlitSurface(obj1.image,NULL,board.screen,&rect1);
 		}
 		else
 			break;
 		
-		if((rect2.x != obj1.j*50) or (rect2.y != obj1.i*50))
+		if((rect2.x != obj1.j*IMAGE_WIDTH) or (rect2.y != obj1.i*IMAGE_HEIGHT))
 		{
 			if(!checked)
 			{
@@ -167,14 +180,14 @@ void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
 				checked = true;
 			}
 			
-			if(rect2.x < obj1.j*50)
+			if(rect2.x < obj1.j*IMAGE_WIDTH)
 				rect2.x += 1;
-			else if(rect2.x > obj1.j*50)
+			else if(rect2.x > obj1.j*IMAGE_WIDTH)
 				rect2.x -= 1;
 
-			if(rect2.y < obj1.i*50)
+			if(rect2.y < obj1.i*IMAGE_HEIGHT)
 				rect2.y += 1;
-			else if(rect2.y > obj1.i*50)
+			else if(rect2.y > obj1.i*IMAGE_HEIGHT)
 				rect2.y -= 1;
 			SDL_BlitSurface(obj2.image,NULL,board.screen,&rect2);
 		}
@@ -190,10 +203,10 @@ void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
 void remove_object_from_screen(Board& board,Object object)
 {
 	SDL_Rect rect;
-	rect.x = object.j*50;
-	rect.y = object.i*50;
-	rect.h = 59;
-	rect.w = 59;
+	rect.x = object.j*IMAGE_WIDTH;
+	rect.y = object.i*IMAGE_HEIGHT;
+	rect.h = IMAGE_HEIGHT;
+	rect.w = IMAGE_WIDTH;
 	SDL_FillRect(board.screen,&rect,0x000000);
 	SDL_Flip(board.screen);
 }
