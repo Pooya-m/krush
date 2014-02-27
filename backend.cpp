@@ -216,6 +216,7 @@ void blow_out(Board& board, vector < Block > blocks)
 		remove_object_from_screen(board,objects[i]);
 		shift_down(board,objects[i].j,0,objects[i].i-1,1);
 	}
+	Mix_PlayChannel( -1,board.blow, 0 );
 	SDL_Delay(1000);
 	reload_screen(board);
 	board.score += objects.size();
@@ -328,14 +329,22 @@ void free_everything(Board& board)
 		free(board.images[i]);
 	free(board.selected_object);
 	SDL_FreeSurface(board.screen);
+	Mix_FreeChunk(board.blow);
+	Mix_FreeMusic(board.music);
+	TTF_CloseFont(board.font);
+	Mix_CloseAudio();
+	TTF_Quit();
 }
 
 bool init_game(Game& game)
 {
 	game.quit = false;
-	init_board(game.board);
+	if(!init_board(game.board))
+		return false;
 	if(!init_screen(game.board))
 		return false;
+
+	return true;
 }
 
 

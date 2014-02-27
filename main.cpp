@@ -11,8 +11,12 @@ int main(int argc,char* args[])
 	SDL_Event event;
 	vector <Object> selected_objects;
 	srand(time(NULL));
-	init_game(game);
-
+	if(!init_game(game))
+	{
+		cout << "couldn't init!" << endl;
+		return -1;
+	}
+	Mix_PlayMusic(game.board.music, -1 );
 	while(!game.quit)
 	{
 		dump_time(game.board);

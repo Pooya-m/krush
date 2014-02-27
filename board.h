@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
+#include "SDL/SDL_mixer.h"
 
 #define COLORS_COUNT 5
 #define TYPE_NORMAL 0
@@ -41,9 +42,12 @@ typedef struct Board {
 	TTF_Font* font;
 	int time;
 	int score;
+
+	Mix_Music* music;
+	Mix_Chunk* blow;
 } Board;
 
-void init_board(Board&);
+bool init_board(Board&);
 void set_object(Object&,int,char,int,int);
 void fill_board(Board&);
 void dump_board(Board&);
