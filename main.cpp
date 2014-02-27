@@ -1,7 +1,6 @@
 #include <cstring>
 #include <cmath>
 #include "backend.h"
-#include "graphic.h"
 #include <cstdlib>
 using namespace std;
 

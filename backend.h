@@ -1,4 +1,3 @@
-#include "board.h"
 #include "graphic.h"
 
 typedef struct Game {

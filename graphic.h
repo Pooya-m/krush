@@ -1,9 +1,8 @@
 //#include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_ttf.h"
-#include "board.h"
 #include "utils.h"
-#include "resource.h"
+#include "board.h"
 #include <string>
 
 using namespace std;
@@ -12,7 +11,7 @@ using namespace std;
 #define SCREEN_BPP 32
 #define SCORE_VALUE_COLOR {82,182,00}
 #define INFO_X_OFFSET 30
-#define INFO_Y_OFFSET 30
+#define INFO_Y_OFFSET 10
 #define IMAGE_HEIGHT 50
 #define IMAGE_WIDTH 50
 

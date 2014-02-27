@@ -283,14 +283,16 @@ void render_text(Board& board, int x, int y,string message,SDL_Color color)
 void show_score(Board& board)
 {
 	SDL_Color color = SCORE_VALUE_COLOR;
-	render_text(board,INFO_X_OFFSET,(board.row_count * IMAGE_WIDTH) + INFO_Y_OFFSET,"Score: "+to_string(board.score),color);
+	render_text(board,INFO_X_OFFSET,(board.row_count * IMAGE_HEIGHT) + INFO_Y_OFFSET,"Score: "+to_string(board.score),color);
 }
 
 void dump_time(Board& board)
 {
 	SDL_Rect rect;
 	rect.x = INFO_X_OFFSET;
-	rect.y = (board.column_count * IMAGE_HEIGHT) + INFO_Y_OFFSET;
+	rect.y = (board.row_count * IMAGE_HEIGHT) + INFO_Y_OFFSET + 30;
+	cout << "time x:  " << rect.x << endl;
+	cout << "time y:  " << rect.y << endl;
 	rect.h = IMAGE_HEIGHT+10;
 	rect.w = IMAGE_WIDTH;
 	SDL_FillRect(board.screen,&rect,0x000000);
