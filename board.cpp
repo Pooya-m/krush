@@ -10,7 +10,8 @@ bool init_board(Board& board)
 	board.colors[4] = 'o';
 	board.score = 0;
 	board.time = 60;
-
+	board.blow_same_bonus = 1;
+	board.blow_row_column_bonus = 1;
 
 	cin >> board.row_count >> board.column_count;
 

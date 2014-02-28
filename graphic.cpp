@@ -15,6 +15,34 @@ bool is_valid_click(Board board, SDL_Event event)
 	int x = event.button.x;
 	int y = event.button.y;
 
+	if((y / IMAGE_HEIGHT) == 0 and (x / IMAGE_WIDTH) == board.column_count)
+	{
+		if(board.blow_same_bonus > 0)
+		{
+			cout << "valid bonus click" << endl;
+			return true;
+		}
+		else
+		{
+			cout << "expired bonus click" << endl;
+			return false;
+		}
+	}
+
+	if((y / IMAGE_HEIGHT == 1) and (x / IMAGE_WIDTH) == board.column_count)
+	{
+		if(board.blow_row_column_bonus > 0)
+		{
+			cout << "valid bonus click" << endl;
+			return true;
+		}
+		else
+		{
+			cout << "expired bonus click" << endl;
+			return false;
+		}
+	}
+	
 	if((y / IMAGE_HEIGHT) >= board.row_count)
 		return false;
 	if((x / IMAGE_WIDTH) >= board.column_count)
@@ -29,6 +57,9 @@ bool is_valid_click(Board board, SDL_Event event)
 
 bool select_object(Board& board, SDL_Event event,vector <Object>& selected_objects)
 {
+	int x = event.button.x;
+	int y = event.button.y;
+
 	if(!is_valid_click(board,event))
 	{
 		cout << "not a valid click!" << endl;
@@ -37,23 +68,48 @@ bool select_object(Board& board, SDL_Event event,vector <Object>& selected_objec
 		return false;
 	}
 	
-	int x = event.button.x;
-	int y = event.button.y;
-
 	for(int i = 0; i < selected_objects.size(); i++)
 	{
 		if(selected_objects[i].i == y / IMAGE_HEIGHT and selected_objects[i].j == x / IMAGE_WIDTH)
 		{
+			cout << "here!" << endl;
 			unselect_object(board,selected_objects[i]);
+			cout << "not here!" << endl;
 			return false;
 		}
 	}
+
 											
 	cout << "selected:  " << endl;
 	cout << y / 50 << " " << x / 50 << endl;
-	apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.resources.selected_object_image,board.screen);
+
+	
+	if((y / IMAGE_HEIGHT) == 0 and (x / IMAGE_WIDTH) == board.column_count)
+	{
+		Object bonus_bomb;
+		bonus_bomb.image = board.resources.bonus_images[0];
+		bonus_bomb.type = TYPE_BLOW_SAME_BONUS;
+		bonus_bomb.i = 0;
+		bonus_bomb.j = board.column_count;		
+		selected_objects.push_back(bonus_bomb);
+	  apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.resources.bonus_images[0],board.screen);
+	}
+	else if((y / IMAGE_HEIGHT) == 1 and (x / IMAGE_WIDTH) == board.column_count)
+	{
+		Object bonus_bomb;
+		bonus_bomb.image = board.resources.bonus_images[1];
+		bonus_bomb.type = TYPE_BLOW_ROW_COLUMN_BONUS;
+		bonus_bomb.i = 1;
+		bonus_bomb.j = board.column_count;		
+		selected_objects.push_back(bonus_bomb);
+	  apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.resources.bonus_images[1],board.screen);
+	}
+	else
+	{
+		selected_objects.push_back(board.objects[y/IMAGE_HEIGHT][x/IMAGE_WIDTH]);
+		apply_surface((x / IMAGE_WIDTH) * IMAGE_WIDTH, (y / IMAGE_HEIGHT) * IMAGE_HEIGHT,board.resources.selected_object_image,board.screen);
+	}
 	SDL_Flip(board.screen);
-	selected_objects.push_back(board.objects[y/IMAGE_HEIGHT][x/IMAGE_WIDTH]);
 	return true;
 }
 
@@ -85,8 +141,12 @@ void dump_board_without(Board& board, Object obj1,Object obj2)
 			apply_surface(j*IMAGE_WIDTH,i*IMAGE_HEIGHT,board.objects[i][j].image,board.screen);
 			}
 
+	apply_surface(board.column_count * IMAGE_WIDTH,0,board.resources.bonus_images[0],board.screen);
+	apply_surface(board.column_count * IMAGE_WIDTH,IMAGE_HEIGHT,board.resources.bonus_images[1],board.screen);
+	
 	show_score(board);
 	dump_time(board);
+	dump_bonus(board);
 	}
 
 void move_to(Board& board,Object& object, vector <Object> removed_objects,int dest_x, int dest_y)
@@ -195,8 +255,13 @@ void reload_screen(Board& board)
 	for(int i = 0; i < board.row_count; i++)
 		for(int j = 0; j < board.column_count; j++)
 			apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
+
+	apply_surface(board.column_count * IMAGE_WIDTH,0,board.resources.bonus_images[0],board.screen);
+	apply_surface(board.column_count * IMAGE_WIDTH,IMAGE_HEIGHT,board.resources.bonus_images[1],board.screen);
+	
 	show_score(board);
 	dump_time(board);
+	dump_bonus(board);
 }
 
 
@@ -246,10 +311,8 @@ bool init_screen(Board& board)
 		  }
 				apply_surface(j*50,i*50,board.objects[i][j].image,board.screen);
 			}
-		
-		//apply_surface(0,0,board.objects[0][0].image,board.screen);
+	 
 		reload_screen(board);
-		//apply_surface(100,100,board.resources.bomb_images[2],board.screen);
 	return true;
 }
 
@@ -291,14 +354,36 @@ void dump_time(Board& board)
 	SDL_Rect rect;
 	rect.x = INFO_X_OFFSET;
 	rect.y = (board.row_count * IMAGE_HEIGHT) + INFO_Y_OFFSET + 30;
-	cout << "time x:  " << rect.x << endl;
-	cout << "time y:  " << rect.y << endl;
 	rect.h = IMAGE_HEIGHT+10;
 	rect.w = IMAGE_WIDTH;
 	SDL_FillRect(board.screen,&rect,0x000000);
 	SDL_Flip(board.screen);
 	SDL_Color color = SCORE_VALUE_COLOR;
 	render_text(board,rect.x,rect.y,to_string(TOTAL_TIME - board.time),color);
+}
+
+void dump_bonus(Board& board)
+{
+	cout << "dump bonus" << endl;
+	cout << "bonus:  " << board.blow_same_bonus << endl;
+	
+	SDL_Rect rect;
+	rect.x = ((board.column_count+1) * IMAGE_WIDTH)+10;
+	rect.y = 10;
+	rect.h = IMAGE_HEIGHT;
+	rect.w = IMAGE_WIDTH;
+	SDL_FillRect(board.screen,&rect,0x000000);
+	SDL_Flip(board.screen);
+	SDL_Color color = SCORE_VALUE_COLOR;
+	render_text(board,rect.x,rect.y,to_string(board.blow_same_bonus),color);
+
+	rect.x = ((board.column_count+1) * IMAGE_WIDTH)+10;
+	rect.y = 10+IMAGE_HEIGHT;
+	rect.h = IMAGE_HEIGHT;
+	rect.w = IMAGE_WIDTH;
+	SDL_FillRect(board.screen,&rect,0x000000);
+	SDL_Flip(board.screen);
+	render_text(board,rect.x,rect.y,to_string(board.blow_row_column_bonus),color);
 }
 
 

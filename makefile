@@ -21,7 +21,8 @@ resource.o: resource.cpp
 	g++ $(CFLAGS) resource.cpp
 
 utils.o: utils.cpp
-	g++ $(CFLAGS) utils.cpp 
+	g++ $(CFLAGS) utils.cpp
+
 
 clean:
 	rm -rf *o a.out

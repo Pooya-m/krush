@@ -11,6 +11,8 @@
 
 #define COLORS_COUNT 5
 #define TYPE_NORMAL 0
+#define TYPE_BLOW_SAME_BONUS 1
+#define TYPE_BLOW_ROW_COLUMN_BONUS 2
 #define TOTAL_TIME 60
 
 using namespace std;
@@ -36,6 +38,10 @@ typedef struct Board {
 	SDL_Surface* screen;
 	int time;
 	int score;
+
+	int blow_same_bonus;
+	int blow_row_column_bonus;
+	
 	Resource resources;
 } Board;
 

@@ -25,5 +25,6 @@ bool is_over(Board);
 void refill_board(Board&);
 bool init_game(Game& game);
 void free_everything(Board&);
+bool handle_bonus(Board&,vector<Object>&);
 
 

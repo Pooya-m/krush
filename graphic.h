@@ -30,3 +30,4 @@ void render_text(Board& board,int x, int y,string,SDL_Color);
 void show_score(Board&);
 SDL_Surface* load_image(string);
 void dump_time(Board&);
+void dump_bonus(Board&);

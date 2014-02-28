@@ -266,17 +266,84 @@ void rotate_and_blow_out(Board& board, Object& obj1, Object& obj2)
 	}
 }
 
+bool handle_bonus(Board& board,vector<Object>& selected_objects)
+{
+	int index = -1;
+	int type;
+			
+	if(selected_objects[0].type == TYPE_BLOW_SAME_BONUS)
+	{
+		type = TYPE_BLOW_SAME_BONUS;
+		index = 0;
+	}
+	else if(selected_objects[1].type == TYPE_BLOW_SAME_BONUS)
+	{
+		type = TYPE_BLOW_SAME_BONUS;
+		index = 1;
+	}
+
+	if(selected_objects[0].type == TYPE_BLOW_ROW_COLUMN_BONUS)
+	{
+		type = TYPE_BLOW_ROW_COLUMN_BONUS;
+		index = 0;
+	}
+	else if(selected_objects[1].type == TYPE_BLOW_ROW_COLUMN_BONUS)
+	{
+		type = TYPE_BLOW_ROW_COLUMN_BONUS;
+		index = 1;
+	}
+			
+	if(index != -1)
+	{
+		vector <Block> block_vector;
+		Block block;
+		if(type == TYPE_BLOW_SAME_BONUS)
+		{
+					
+			for(int i = 0; i < board.row_count; i++)
+				for(int j = 0; j < board.column_count; j++)
+					if(board.objects[i][j].color == selected_objects[1-index].color)
+					{
+						block.sub_blocks.push_back(vector < Object >(1,board.objects[i][j]));
+					}
+			block_vector.push_back(block);
+			board.blow_same_bonus -= 1;
+		}
+		else if(type == TYPE_BLOW_ROW_COLUMN_BONUS)
+		{
+			for(int i = 0; i < board.row_count; i++)
+				for(int j = 0; j < board.column_count; j++)
+					if(i == selected_objects[1-index].i or j == selected_objects[1-index].j)
+					{
+						block.sub_blocks.push_back(vector < Object >(1,board.objects[i][j]));
+					}
+			block_vector.push_back(block);
+			board.blow_row_column_bonus -= 1;
+		}
+				
+		blow_out(board,block_vector);
+		selected_objects.clear();
+		cout << "new board blow same bonus:  " << board.blow_same_bonus << endl;
+		reload_screen(board);
+		return true;
+	}
+	return false;
+}
+
 void handle_mouse_event(Board& board,SDL_Event event,vector <Object>& selected_objects)
 {
 	if(event.button.button == SDL_BUTTON_LEFT )
  	{
 		if(!select_object(board,event,selected_objects))
 			selected_objects.clear();
-		
 		if(selected_objects.size() == 2)
 		{
+			if(handle_bonus(board,selected_objects))
+				return;
 			if(rotatable(board,selected_objects[0],selected_objects[1]))
+			{
 				rotate_and_blow_out(board,selected_objects[0],selected_objects[1]);
+			}
 			else
 			{
 				rotate(board,selected_objects[0],selected_objects[1]);
@@ -329,15 +396,25 @@ void refill_board(Board& board)
 
 void free_everything(Board& board)
 {
+	cout << "free0" << endl;
 	for(int i = 0; i < 5; i++)
 		free(board.resources.bomb_images[i]);
+	cout << "free1" << endl;
 	free(board.resources.selected_object_image);
+	cout << "free2" << endl;
 	SDL_FreeSurface(board.screen);
+	cout << "free3" << endl;
 	Mix_FreeChunk(board.resources.blowing_out_sound);
+	cout << "free4" << endl;
+	cout << board.resources.background_music << endl;
 	Mix_FreeMusic(board.resources.background_music);
+	cout << "free5" << endl;
 	TTF_CloseFont(board.resources.font);
+	cout << "free6" << endl;
 	Mix_CloseAudio();
+	cout << "free7" << endl;
 	TTF_Quit();
+	cout << "free8" << endl;
 }
 
 bool init_game(Game& game)

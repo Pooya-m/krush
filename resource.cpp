@@ -9,6 +9,10 @@ bool init_resources(Resource& resource)
 	resource.bomb_images[2] = load_image(GREEN_FILE_NAME);
 	resource.bomb_images[3] = load_image(YELLOW_FILE_NAME);
 	resource.bomb_images[4] = load_image(ORRANGE_FILE_NAME);
+	
+	resource.bonus_images[0] = load_image(BONUS_BLOW_SAME_FILE_NAME);
+	resource.bonus_images[1] = load_image(BONUS_BLOW_ROW_COLUMN_FILE_NAME);
+	
 	resource.selected_object_image = load_image(SELECTED_OBJECT_FILE_NAME);
 	
 	resource.background_music = NULL;
