@@ -139,15 +139,41 @@ void dump_board_without(Board& board, Object obj1,Object obj2)
 			if(obj2.i == i and obj2.j == j)
 				continue;
 			apply_surface(j*IMAGE_WIDTH,i*IMAGE_HEIGHT,board.objects[i][j].image,board.screen);
-			}
-
-	apply_surface(board.column_count * IMAGE_WIDTH,0,board.resources.bonus_images[0],board.screen);
-	apply_surface(board.column_count * IMAGE_WIDTH,IMAGE_HEIGHT,board.resources.bonus_images[1],board.screen);
-	
+		}
 	show_score(board);
 	dump_time(board);
 	dump_bonus(board);
-	}
+}
+
+void dump_board_without(Board& board, vector<Object> objects)
+{
+	SDL_Rect rect;
+	rect.h = SCREEN_HEIGHT;
+	rect.w = SCREEN_WIDTH;
+	SDL_FillRect(board.screen,NULL,0x000000);
+	bool check = false;
+//	bool should_countinue = false;
+	for(int i = 0; i < board.row_count; i++)
+		for(int j = 0; j < board.column_count; j++)
+		{
+			for(int k = 0; k < objects.size(); k++)
+				if(objects[k].i == i and objects[k].j == j)
+				{
+					check = true;
+					break;
+				}
+			if(check)
+			{
+				check = false;
+				continue;
+			}
+			apply_surface(j*IMAGE_WIDTH,i*IMAGE_HEIGHT,board.objects[i][j].image,board.screen);
+			}
+	show_score(board);
+	dump_time(board);
+	dump_bonus(board);
+	SDL_Flip(board.screen);
+}
 
 void move_to(Board& board,Object& object, vector <Object> removed_objects,int dest_x, int dest_y)
 {
@@ -170,6 +196,24 @@ void move_to(Board& board,Object& object, vector <Object> removed_objects,int de
 		SDL_Flip(board.screen);
 		SDL_Delay(3);
 	}
+}
+
+void shift_in_cycle(Board& board, Object& object,int dest_x,int dest_y,SDL_Rect& rect)
+{
+/*	SDL_Rect rect;
+	rect.x = object.j * IMAGE_WIDTH;
+	rect.y = object.i * IMAGE_HEIGHT;*/
+	
+	if(rect.x < dest_x)
+		rect.x += 1;
+	else if(rect.x > dest_x)
+		rect.x -= 1;
+
+	if(rect.y < dest_y)
+		rect.y += 1;
+	else if(rect.y > dest_y)
+		rect.y -= 1;
+	SDL_BlitSurface(object.image,NULL,board.screen,&rect);
 }
 
 void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
@@ -232,6 +276,49 @@ void rotate_in_graphic(Board& board,Object& obj1,Object& obj2)
 		checked = false;
 		SDL_Flip(board.screen);
 		SDL_Delay(3);
+	}
+}
+
+void shift_down_in_graphic(Board& board,int column,int row_start,int row_end,int offset)
+{
+	vector < SDL_Rect > rects;
+	vector <Object> objects;
+	SDL_Rect temp;
+	for(int i = row_start; i <= row_end; i++)
+	{
+		temp.x = column * IMAGE_WIDTH;
+		temp.y = i * IMAGE_HEIGHT;
+		rects.push_back(temp);
+		objects.push_back(board.objects[i][column]);
+	}
+	bool finish = false;
+	bool dumped = false;
+	int test;
+	while(!finish)
+	{
+		dump_board_without(board,objects);
+		for(int i = row_start; i <= row_end; i++)
+		{
+			finish = true;
+			if((rects[i-row_start].y != (i+offset)*IMAGE_HEIGHT))
+			{
+				shift_in_cycle(board,board.objects[i][column],column*IMAGE_WIDTH,(i+offset)*IMAGE_HEIGHT,rects[i-row_start]);
+				finish = false;
+			}
+			if(finish)
+			{
+				for(int k = 0; k < objects.size();)
+				{
+					if(objects[k].i == i and objects[k].j == column)
+						objects.erase(objects.begin() + k);
+					else
+						k++;
+				}
+				dump_board_without(board,objects);
+			}
+		}
+		SDL_Flip(board.screen);
+		SDL_Delay(10);
 	}
 }
 
@@ -364,8 +451,8 @@ void dump_time(Board& board)
 
 void dump_bonus(Board& board)
 {
-	cout << "dump bonus" << endl;
-	cout << "bonus:  " << board.blow_same_bonus << endl;
+	apply_surface(board.column_count * IMAGE_WIDTH,0,board.resources.bonus_images[0],board.screen);
+	apply_surface(board.column_count * IMAGE_WIDTH,IMAGE_HEIGHT,board.resources.bonus_images[1],board.screen);
 	
 	SDL_Rect rect;
 	rect.x = ((board.column_count+1) * IMAGE_WIDTH)+10;

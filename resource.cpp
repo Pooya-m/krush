@@ -14,6 +14,7 @@ bool init_resources(Resource& resource)
 	resource.bonus_images[1] = load_image(BONUS_BLOW_ROW_COLUMN_FILE_NAME);
 	
 	resource.selected_object_image = load_image(SELECTED_OBJECT_FILE_NAME);
+	resource.empty_image = load_image(EMPTY_FILE_NAME);
 	
 	resource.background_music = NULL;
 	resource.blowing_out_sound = NULL;

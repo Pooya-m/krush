@@ -11,6 +11,7 @@
 #define GREEN_FILE_NAME "resources/img/g.bmp"
 #define YELLOW_FILE_NAME "resources/img/y.bmp"
 #define ORRANGE_FILE_NAME "resources/img/o.bmp"
+#define EMPTY_FILE_NAME "resources/img/empty.bmp"
 
 #define BONUS_BLOW_SAME_FILE_NAME "resources/img/same.bmp"
 #define BONUS_BLOW_ROW_COLUMN_FILE_NAME "resources/img/row_column.bmp"
@@ -26,7 +27,10 @@ typedef struct Resource {
 	SDL_Surface* bomb_images[BOMB_TYPES_COUNT];
 	SDL_Surface* bonus_images[2];
 	SDL_Surface* selected_object_image;
+	SDL_Surface* empty_image;
+	
 	TTF_Font* font;
+
 	Mix_Music* background_music;
 	Mix_Chunk* blowing_out_sound;
 	Mix_Chunk* laser_sound;

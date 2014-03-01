@@ -18,11 +18,19 @@ using namespace std;
 
 bool init_screen(Board&);
 void apply_surface(int x, int y,SDL_Surface*&, SDL_Surface*& );
+
 bool select_object(Board&,SDL_Event,vector<Object>& selected_objects);
 void unselect_object(Board&,Object);
+
 void rotate_in_graphic(Board&,Object&,Object&);
+void shift_in_cycle(Board&,Object&,int,int,SDL_Rect&);
+void shift_down_in_graphic(Board&,int column,int row_start,int row_end,int offset);
+	
 bool is_valid_click(Board,SDL_Event);
+
 void dump_board_without(Board&,Object,Object);
+void dump_board_without(Board&,vector<Object>);
+
 void remove_object_from_screen(Board&,Object);
 void move_to(Board&,Object&,vector <Object>,int dest_x,int dest_y);
 void reload_screen(Board&);

@@ -15,7 +15,7 @@ int main(int argc,char* args[])
 		cout << "couldn't init!" << endl;
 		return -1;
 	}
-	
+
 	while(!game.quit)
 	{
 		dump_time(game.board);

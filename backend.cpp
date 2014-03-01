@@ -97,7 +97,7 @@ void rotate(Board& board,Object& obj1,Object& obj2)
 	
 }
 
-Block get_duplicates_block(Board board,Object object) //pattern: cArBtC (column A from row B to row C)
+Block get_duplicates_block(Board board,Object object)
 {
 	Block block;
 	int min_j,max_j,min_i,max_i,self_index = -1;
@@ -144,23 +144,6 @@ Object get_random_object(Board board)
 	
 }
 
-void shift_down(Board& board, int column, int row_start, int row_end, int offset)
-{
-	for(int i = row_end; i >= row_start; i--)
-	{
-		board.objects[i+offset][column].type = board.objects[i][column].type;
-		board.objects[i+offset][column].color = board.objects[i][column].color;
-		board.objects[i+offset][column].image = board.objects[i][column].image;
-	}
-	
-	for(int i = row_start+offset-1; i >= 0; i--)
-	{
-		Object temp = get_random_object(board);
-		board.objects[i][column].color = temp.color;
-		board.objects[i][column].image = temp.image;
-	}
-}
-
 vector <Object> get_objects(Block block)
 {
 	vector <Object> result;
@@ -180,6 +163,28 @@ bool compare(Object obj1,Object obj2)
 			return true;
 	
 	return false;
+}
+
+void shift_down(Board& board, int column, int row_start, int row_end, int offset)
+{
+	bool check = false;
+	for(int i = row_end; i >= row_start; i--)
+	{
+		if(!check)
+		{
+			shift_down_in_graphic(board,column,row_start,row_end,offset);
+			check = true;
+		}
+		board.objects[i+offset][column].type = board.objects[i][column].type;
+		board.objects[i+offset][column].color = board.objects[i][column].color;
+		board.objects[i+offset][column].image = board.objects[i][column].image;
+	}
+	for(int i = row_start+offset-1; i >= 0; i--)
+	{
+		Object temp = get_random_object(board);
+		board.objects[i][column].color = temp.color;
+		board.objects[i][column].image = temp.image;
+	}
 }
 
 void blow_out(Board& board, vector < Block > blocks)
@@ -211,23 +216,25 @@ void blow_out(Board& board, vector < Block > blocks)
 			i++;
 	}
 	SDL_Delay(500);
+	Mix_PlayChannel(-1,board.resources.blowing_out_sound, 0 );
+	
+	board.score += objects.size();
+	if(((float)objects.size() / (board.row_count * board.column_count)) >= 0.25)
+		board.blow_same_bonus += 1;
+	if(((float)objects.size() / (board.row_count * board.column_count)) >= 0.5)
+		board.blow_row_column_bonus += 1;
+	
 	for(int i = 0; i < objects.size(); i++)
 	{
+		board.objects[objects[i].i][objects[i].j].image = board.resources.empty_image;
 		remove_object_from_screen(board,objects[i]);
-		shift_down(board,objects[i].j,0,objects[i].i-1,1);
 	}
-	
-	Mix_PlayChannel(-1,board.resources.blowing_out_sound, 0 );
-	SDL_Delay(1000);
-	reload_screen(board);
-	board.score += objects.size();
-
-	cout << "new score:  " << board.score << endl;
-	
-	cout << "after blow:  " << endl;
-	dump_board(board);
-	cout << endl;
-
+	SDL_Delay(500);
+	for(int i = 0; i < objects.size(); i++)
+	{
+		shift_down(board,objects[i].j,0,objects[i].i-1,1);
+		reload_screen(board);
+	}
 	
 	for(int i = 0; i < objects.size();i++) //for caution
 		for(int j = 0; j <= objects[i].i;j++)
@@ -396,25 +403,18 @@ void refill_board(Board& board)
 
 void free_everything(Board& board)
 {
-	cout << "free0" << endl;
+	cout << "[log] started freeing the world" << endl;
 	for(int i = 0; i < 5; i++)
 		free(board.resources.bomb_images[i]);
-	cout << "free1" << endl;
 	free(board.resources.selected_object_image);
-	cout << "free2" << endl;
 	SDL_FreeSurface(board.screen);
-	cout << "free3" << endl;
 	Mix_FreeChunk(board.resources.blowing_out_sound);
-	cout << "free4" << endl;
 	cout << board.resources.background_music << endl;
 	Mix_FreeMusic(board.resources.background_music);
-	cout << "free5" << endl;
 	TTF_CloseFont(board.resources.font);
-	cout << "free6" << endl;
 	Mix_CloseAudio();
-	cout << "free7" << endl;
 	TTF_Quit();
-	cout << "free8" << endl;
+	cout << "[log] I freed the world! " << endl;
 }
 
 bool init_game(Game& game)
